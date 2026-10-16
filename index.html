@@ -3,171 +3,181 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TCP/IP Visual Guide</title>
-<style>
-:root{--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#cbd5e1;--accent:#38bdf8;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-a{color:var(--accent)}
-.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;color:#000;padding:8px;z-index:9}
-header,main,footer{max-width:960px;margin:auto;padding:16px}
-nav{position:sticky;top:0;background:#0b1222;padding:8px 16px;display:flex;gap:16px;flex-wrap:wrap;border-bottom:1px solid #334155}
-h1{font-size:2rem}h2{border-bottom:2px solid var(--accent);padding-bottom:4px;margin-top:48px}
-.card{background:var(--card);border-radius:12px;padding:16px;margin:16px 0}
-button{background:var(--accent);color:#0f172a;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;margin:4px 4px 4px 0}
-button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
-input[type=text]{padding:8px;border-radius:6px;border:1px solid #64748b;background:#0f172a;color:var(--text);width:100%;max-width:320px}
-.layer{display:block;width:100%;text-align:left;margin:6px 0;padding:14px;font-size:1rem;color:#0f172a}
-.l4{background:#a78bfa}.l3{background:#38bdf8}.l2{background:#4ade80}.l1{background:#fbbf24}
-.pkts{display:flex;gap:8px;flex-wrap:wrap;min-height:60px}
-.pkt{border:2px solid var(--accent);border-radius:8px;padding:6px 10px;background:#0f172a;font-family:monospace}
-.pkt.lost{border-color:var(--bad);text-decoration:line-through}
-.pkt.re{border-color:var(--warn)}
-.pkt.ok{border-color:var(--ok)}
-.bits{font-family:monospace;font-size:1.05rem;word-break:break-all}
-.net{color:var(--accent);font-weight:700}.host{color:var(--warn)}
-table{border-collapse:collapse;width:100%}td,th{border:1px solid #475569;padding:6px;text-align:left}
-.legend{font-size:.9rem;color:var(--muted)}
-@media(prefers-reduced-motion:no-preference){.pkt{transition:all .3s}}
-</style>
+<title>TCP/IP Visual Guide: how data crosses the internet</title>
+<meta name="description" content="A visual, interactive guide to TCP/IP, packets, TCP, and IPv4 subnetting for beginners.">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <nav aria-label="Sections">
-<a href="#layers">Layers</a><a href="#tcp">TCP</a><a href="#ipv4">IPv4</a><a href="#subnet">Subnets</a><a href="#sources">Sources</a>
+<ul>
+<li><a href="#intro">Intro</a></li><li><a href="#layers">Layers</a></li><li><a href="#tcp">TCP</a></li><li><a href="#ipv4">IPv4</a></li><li><a href="#subnet">Subnets</a></li><li><a href="#together">Web request</a></li><li><a href="#quiz">Quiz</a></li><li><a href="#glossary">Glossary</a></li><li><a href="#sources">Sources</a></li>
+</ul>
 </nav>
-<header><h1>How the Internet Sends Data: TCP/IP</h1>
-<p>TCP/IP is a set of rules (called <strong>protocols</strong>) that lets computers talk to each other. Think of it like the postal system: there are rules for addressing, packaging, delivering, and checking that the mail arrived.</p></header>
+<header id="intro">
+<h1>How the Internet Sends Data: TCP/IP</h1>
+<p><strong>TCP/IP</strong> is a set of rules (called <strong>protocols</strong>) that lets computers talk to each other. Think of it like the postal system: there are rules for addressing, packaging, delivering, and checking that the mail arrived. <strong>IP</strong> (Internet Protocol) gives every device an address and moves small pieces of data toward it. <strong>TCP</strong> (Transmission Control Protocol) makes sure those pieces arrive complete and in order. Together they carry almost everything you do online.</p>
+</header>
 <main id="main">
 
-<section id="layers"><h2>1. The Four Layers</h2>
-<p>TCP/IP splits the job into 4 layers. Each layer does one job and hands the data to the next. Select a layer to learn more.</p>
+<section id="layers" aria-labelledby="h-layers"><h2 id="h-layers">1. The Four Layers</h2>
+<p>TCP/IP splits the job into 4 <strong>layers</strong>. Each layer does one job and hands the data to the next. Select a layer to learn more.</p>
+<p class="legend">The older <strong>OSI model</strong> describes the same ideas with 7 layers. TCP/IP groups them into 4.</p>
 <div class="card">
-<button class="layer l4" data-i="0">Layer 4 – Application: the data you use (web, email)</button>
-<button class="layer l3" data-i="1">Layer 3 – Transport: breaks data up and checks delivery</button>
-<button class="layer l2" data-i="2">Layer 2 – Internet: addresses and routes packets</button>
-<button class="layer l1" data-i="3">Layer 1 – Network Interface (Link): sends bits over wire or Wi-Fi</button>
+<div class="stack" role="group" aria-label="TCP/IP layer stack. Top is Application, bottom is Network Interface.">
+<button class="layer l4" aria-pressed="false" data-i="0"><span>Application</span><span>the data you use (web, email)</span></button>
+<button class="layer l3" aria-pressed="false" data-i="1"><span>Transport</span><span>breaks data up, checks delivery</span></button>
+<button class="layer l2" aria-pressed="false" data-i="2"><span>Internet</span><span>addresses and routes packets</span></button>
+<button class="layer l1" aria-pressed="false" data-i="3"><span>Network Interface (Link)</span><span>sends bits over wire or Wi-Fi</span></button>
+</div>
 <div id="layerInfo" aria-live="polite" class="card"></div>
 </div>
-<div class="card"><h3>Encapsulation: adding "envelopes"</h3>
-<p>Going down the stack, each layer wraps the data with its own header, like putting a letter in an envelope, then in a bigger envelope.</p>
-<button id="encBtn">Show next step</button><button id="encReset">Reset</button>
-<div id="enc" aria-live="polite" class="bits"></div></div>
+<div class="card"><h3>Encapsulation: adding and removing "envelopes"</h3>
+<p><strong>Encapsulation</strong> means wrapping data. Going down the stack, each layer adds its own <strong>header</strong> (a label with instructions), like putting a letter in an envelope and then in a bigger envelope. The link layer also adds a <strong>trailer</strong> at the end. At the receiver, going up the stack, each layer removes its own header.</p>
+<div class="enc" id="enc" role="img" aria-label="Encapsulation diagram"></div>
+<p id="encCap" aria-live="polite"></p>
+<button id="encBtn">Next step</button><button id="encReset" class="sec">Reset</button>
+</div>
 </section>
 
-<section id="tcp"><h2>2. Transport Layer and TCP</h2>
+<section id="tcp" aria-labelledby="h-tcp"><h2 id="h-tcp">2. Transport Layer and TCP</h2>
 <div class="card"><h3>Why break data into packets?</h3>
-<ul><li>Links are shared. Small pieces let many people take turns.</li>
-<li>If one piece is damaged or lost, only that piece is sent again, not the whole file.</li>
-<li>Networks have size limits. On Ethernet, a packet commonly holds up to about 1500 bytes.</li>
-<li>Pieces can take different routes.</li></ul>
-<p>Analogy: mailing a book as numbered envelopes. The numbers let the receiver put it back in order.</p></div>
+<ul><li><strong>Shared links.</strong> Small pieces let many people take turns on the same wire.</li>
+<li><strong>Fairness.</strong> One big file cannot hog the link and block everyone else.</li>
+<li><strong>Error recovery.</strong> If one piece is damaged or lost, only that piece is sent again, not the whole file.</li>
+<li><strong>Size limits.</strong> Each link has a maximum frame size. The <strong>MTU</strong> (maximum transmission unit) is commonly 1500 bytes on Ethernet, but other networks can differ.</li>
+<li>Pieces can take different routes, so they may arrive out of order.</li></ul>
+<p>Analogy: mailing a book as numbered envelopes. The numbers let the receiver put the pages back in order and notice a missing one.</p></div>
 
 <div class="card"><h3>Try it: send a message</h3>
-<label for="msg">Message:</label><br>
-<input id="msg" type="text" value="HELLO WORLD FRIEND" maxlength="40"><br>
+<label for="msg">Message (up to 40 characters):</label><br>
+<input id="msg" type="text" value="HELLO WORLD FRIEND" maxlength="40" autocomplete="off"><br>
 <button id="split">1. Split into packets</button>
-<button id="shuffle">2. Send out of order</button>
-<button id="drop">3. Lose one packet</button>
-<button id="fix">4. Let TCP fix it</button>
-<p class="legend">Real TCP numbers bytes, not packets. This demo simplifies by numbering small chunks.</p>
-<h4>Sent</h4><div id="sent" class="pkts"></div>
+<button id="shuffle" disabled>2. Shuffle arrival order</button>
+<button id="drop" disabled>3. Drop a packet</button>
+<button id="send" disabled>4. Send</button>
+<button id="retx" disabled>5. Retransmit missing</button>
+<button id="reset" class="sec">Reset</button>
+<h4>Sent (numbered)</h4><div id="sent" class="pkts"></div>
 <h4>Received (in arrival order)</h4><div id="recv" class="pkts"></div>
-<h4>Reassembled message</h4><div id="out" class="bits" aria-live="polite"></div>
-<p id="status" aria-live="polite"><strong>Status:</strong> Press step 1.</p></div>
+<h4>Receiver's reassembled message</h4><div id="out" class="bits" aria-live="polite"></div>
+<p id="status" aria-live="polite" role="status"><strong>Status:</strong> Press step 1.</p>
+<p class="legend">Key: solid blue outline = normal packet; dashed red outline plus "LOST" = dropped; thick yellow outline plus "RESENT" = retransmitted.</p>
+<p class="note"><strong>Simplified:</strong> real TCP numbers <em>bytes</em>, not packets, and ACKs are usually cumulative ("I have everything up to byte N"). Here we number small 3-character chunks to keep it easy to read.</p></div>
 
 <div class="card"><h3>The 3-way handshake</h3>
-<p>Before sending data, TCP sets up a connection:</p>
-<ol><li><strong>SYN</strong> – Client: "Can we talk?"</li><li><strong>SYN-ACK</strong> – Server: "Yes, I'm ready. Are you?"</li><li><strong>ACK</strong> – Client: "Ready!"</li></ol>
-<p>Then data flows. The receiver sends <strong>ACK</strong>s to confirm what arrived. If the sender doesn't get an ACK in time, it sends the data again.</p></div>
+<p>Before sending data, TCP sets up a connection. Use the button to step through it.</p>
+<svg class="hs" viewBox="0 0 520 230" role="img" aria-labelledby="hsT hsD"><title id="hsT">TCP three-way handshake</title><desc id="hsD">The client sends SYN to the server. The server replies SYN-ACK. The client sends ACK. Then the connection is established.</desc>
+<text x="40" y="24" font-weight="700">Client</text><text x="420" y="24" font-weight="700">Server</text>
+<line class="ln" x1="70" y1="35" x2="70" y2="215"/><line class="ln" x1="450" y1="35" x2="450" y2="215"/>
+<g class="msg" id="hs1"><line x1="70" y1="60" x2="440" y2="95"/><polygon points="448,96 434,87 432,101"/><text x="190" y="64">1. SYN</text></g>
+<g class="msg" id="hs2"><line x1="450" y1="110" x2="80" y2="145"/><polygon points="72,146 86,137 88,151"/><text x="190" y="140">2. SYN-ACK</text></g>
+<g class="msg" id="hs3"><line x1="70" y1="160" x2="440" y2="195"/><polygon points="448,196 434,187 432,201"/><text x="190" y="196">3. ACK</text></g>
+</svg>
+<p id="hsCap" aria-live="polite">Press "Next step".</p>
+<button id="hsBtn">Next step</button><button id="hsReset" class="sec">Reset</button>
+<p>Then data flows. The receiver sends <strong>ACK</strong>s (acknowledgements) to confirm what arrived. If the sender does not get an ACK in time, it sends the data again.</p></div>
 
 <div class="card"><h3>TCP vs UDP</h3>
-<table><tr><th></th><th>TCP</th><th>UDP</th></tr>
-<tr><td>Connection</td><td>Yes (handshake)</td><td>No</td></tr>
-<tr><td>Reliable and ordered</td><td>Yes</td><td>No</td></tr>
-<tr><td>Speed</td><td>Slower (more checking)</td><td>Faster (less overhead)</td></tr>
-<tr><td>Used for</td><td>Web, email, file transfer</td><td>Video calls, games, DNS lookups (usually)</td></tr></table>
-<p>Ports tell the computer which program gets the data: HTTP 80, HTTPS 443, SSH 22, DNS 53.</p></div>
+<div class="tw"><table><caption class="legend">Two Transport layer protocols</caption><tr><th scope="col">Feature</th><th scope="col">TCP</th><th scope="col">UDP</th></tr>
+<tr><th scope="row">Connection</th><td>Yes (handshake first)</td><td>No</td></tr>
+<tr><th scope="row">Reliable and in order</th><td>Yes</td><td>No (app must cope)</td></tr>
+<tr><th scope="row">Overhead</th><td>Higher (more checking)</td><td>Lower (small header)</td></tr>
+<tr><th scope="row">Often used for</th><td>Web pages, email, file transfer</td><td>DNS lookups, voice/video calls, games</td></tr></table></div>
+<h3>Port numbers</h3>
+<p>An IP address finds the computer. A <strong>port number</strong> (0 to 65535) finds the program on it, like an apartment number in a building.</p>
+<div class="tw"><table><tr><th scope="col">Port</th><th scope="col">Service</th></tr><tr><td>80</td><td>HTTP (web)</td></tr><tr><td>443</td><td>HTTPS (secure web)</td></tr><tr><td>53</td><td>DNS (names to addresses)</td></tr><tr><td>22</td><td>SSH (secure remote login)</td></tr></table></div></div>
 </section>
 
-<section id="ipv4"><h2>3. IPv4 Addresses</h2>
+<section id="ipv4" aria-labelledby="h-ipv4"><h2 id="h-ipv4">3. IPv4 Addresses</h2>
 <div class="card">
-<p>An IPv4 address has <strong>32 bits</strong>, written as 4 numbers (<em>octets</em>) of 8 bits each. Each number is 0 to 255. Example: <code>192.168.10.25</code>.</p>
-<p>Total possible addresses: 2<sup>32</sup> = <strong>4,294,967,296</strong> (about 4.3 billion). That's not enough for every device today, so IPv6 (128-bit addresses) was created.</p>
-<label for="ip">Try an address:</label>
-<input id="ip" type="text" value="192.168.10.25">
-<p id="ipBin" class="bits" aria-live="polite"></p></div>
+<p>An IPv4 address has <strong>32 bits</strong> (a bit is a 0 or a 1). It is written in <strong>dotted-decimal</strong> notation: 4 numbers called <strong>octets</strong>, each made of 8 bits, so each is 0 to 255. Example: <code>192.168.10.25</code>.</p>
+<p>Total possible addresses: 2<sup>32</sup> = <strong>4,294,967,296</strong> (about 4.3 billion).</p>
+<label for="ip">Try an address:</label><br>
+<input id="ip" type="text" value="192.168.10.25" inputmode="decimal" autocomplete="off" aria-describedby="ipBin">
+<div id="ipBin" aria-live="polite" class="tw"></div></div>
+<div class="card"><h3>Private ranges and IPv6</h3>
+<p><strong>Private</strong> addresses are for use inside homes and offices and are not routed on the public internet (RFC 1918): <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code>.</p>
+<p><strong>IPv6</strong> uses 128-bit addresses because 32 bits is not enough addresses for every device.</p></div>
 </section>
 
-<section id="subnet"><h2>4. Subnet Masks and Prefixes</h2>
+<section id="subnet" aria-labelledby="h-subnet"><h2 id="h-subnet">4. Subnet Masks and Prefixes</h2>
 <div class="card">
-<p>A <strong>subnet mask</strong> says which bits are the <span class="net">network part</span> (which street) and which are the <span class="host">host part</span> (which house). A <strong>prefix</strong> like <code>/24</code> means "the first 24 bits are the network".</p>
+<p>A <strong>subnet mask</strong> says which bits are the <span class="net">network part</span> (which street) and which are the <span class="host">host part</span> (which house). A <strong>prefix length</strong> like <code>/24</code> means "the first 24 bits are the network". The computer finds the network address with a bitwise <strong>AND</strong>: a result bit is 1 only if both the address bit and the mask bit are 1.</p>
+<label for="subIp">Address:</label>
+<input id="subIp" type="text" value="192.168.10.25" autocomplete="off"><br>
 <label for="pre">Prefix length: /<span id="preVal">24</span></label><br>
-<input id="pre" type="range" min="8" max="30" value="24">
-<p id="subBits" class="bits" aria-live="polite"></p>
-<table id="subTbl"></table>
-<p class="legend">Network address (all host bits 0) and broadcast address (all host bits 1) are reserved, so usable hosts = total − 2.</p></div>
-<div class="card"><h3>/16 vs /24</h3>
-<table><tr><th></th><th>/16</th><th>/24</th></tr>
-<tr><td>Mask</td><td>255.255.0.0</td><td>255.255.255.0</td></tr>
-<tr><td>Host bits</td><td>16</td><td>8</td></tr>
-<tr><td>Total addresses</td><td>65,536</td><td>256</td></tr>
-<tr><td>Usable hosts</td><td>65,534</td><td>254</td></tr></table>
-<p>Bigger prefix number = smaller network.</p>
-<p>Private ranges (not routed on the public internet): 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16.</p></div>
+<input id="pre" type="range" min="8" max="30" value="24" aria-valuetext="/24">
+<div id="subBits" class="bits tw" aria-live="polite"></div>
+<p class="legend">Underlined with N = network bit. Dotted underline with H = host bit.</p>
+<div class="tw"><table id="subTbl"></table></div>
+<p class="legend">The <strong>network address</strong> (all host bits 0) names the network. The <strong>broadcast address</strong> (all host bits 1) reaches every host on it. Both are reserved, so usable hosts = total &minus; 2. (RFC 4632)</p></div>
+<div class="card"><h3>/16 vs /24 side by side</h3>
+<div class="tw"><table><tr><th scope="col">Property</th><th scope="col">/16</th><th scope="col">/24</th></tr>
+<tr><th scope="row">Mask</th><td>255.255.0.0</td><td>255.255.255.0</td></tr>
+<tr><th scope="row">Host bits</th><td>16</td><td>8</td></tr>
+<tr><th scope="row">Total addresses</th><td>65,536</td><td>256</td></tr>
+<tr><th scope="row">Usable hosts</th><td>65,534</td><td>254</td></tr></table></div>
+<p>A bigger prefix number means a smaller network.</p></div>
 </section>
 
-<section id="sources"><h2>Sources</h2>
-<ul><li>RFC 791 – Internet Protocol</li><li>RFC 9293 – TCP</li><li>RFC 768 – UDP</li><li>RFC 1918 – Private address space</li><li>RFC 4632 – CIDR</li></ul>
-<p class="legend">Simplifications: real packets carry more header fields; the simulator numbers chunks instead of bytes.</p></section>
-</main>
-<footer><p class="legend">Draft v0.1 for classroom use.</p></footer>
+<section id="together" aria-labelledby="h-together"><h2 id="h-together">5. Putting It Together: a Web Request</h2>
+<div class="card">
+<p>You type a web address. Step through what happens. The addresses shown are examples.</p>
+<svg class="web" viewBox="0 0 600 260" role="img" aria-labelledby="wT wD"><title id="wT">Web request path</title><desc id="wD">A laptop connects through a router to a web server. A DNS server hangs off the router. A yellow dot shows where the data is.</desc>
+<g class="box"><rect class="box" x="20" y="80" width="90" height="60" rx="8"/><rect class="box" x="255" y="80" width="90" height="60" rx="8"/><rect class="box" x="490" y="80" width="90" height="60" rx="8"/><rect class="box" x="255" y="190" width="90" height="55" rx="8"/></g>
+<line class="ln" x1="110" y1="110" x2="255" y2="110" stroke="#94a3b8" stroke-width="2"/><line x1="345" y1="110" x2="490" y2="110" stroke="#94a3b8" stroke-width="2"/><line x1="300" y1="140" x2="300" y2="190" stroke="#94a3b8" stroke-width="2"/>
+<text x="65" y="115" text-anchor="middle">Laptop</text><text x="300" y="115" text-anchor="middle">Router</text><text x="535" y="115" text-anchor="middle">Web server</text><text x="300" y="222" text-anchor="middle">DNS server</text>
+<circle id="dot" class="dot" cx="65" cy="110" r="10"/>
+</svg>
+<p id="webCap" aria-live="polite">Press "Next step".</p>
+<button id="webBtn">Next step</button><button id="webReset" class="sec">Reset</button>
+<ol><li><strong>DNS lookup:</strong> the laptop asks, "What is the IP address of this name?" <strong>DNS</strong> (Domain Name System) answers, for example <code>203.0.113.10</code>.</li>
+<li><strong>TCP handshake:</strong> SYN, SYN-ACK, ACK with the server (port 443 for HTTPS or 80 for HTTP).</li>
+<li><strong>HTTP request:</strong> the laptop asks for the page.</li>
+<li><strong>Response:</strong> the server sends the page back in packets.</li></ol>
+<p class="legend">Each device on the path is a hop. Routers look at the destination IP address and forward the packet.</p></div>
+</section>
 
-<script>
-const $=id=>document.getElementById(id);
-// Layers
-const info=[
-["Application","Programs use this layer to talk over the network.","Like writing the letter.","HTTP, HTTPS, DNS, SMTP","Data / message"],
-["Transport","Splits data into pieces, numbers them, and (with TCP) checks they arrive.","Like numbering the pages and asking for a receipt.","TCP, UDP","Segment (TCP) / Datagram (UDP)"],
-["Internet","Adds source and destination IP addresses and picks the route.","Like writing the street address.","IP, ICMP","Packet"],
-["Network Interface (Link)","Sends bits over the local wire or Wi-Fi to the next device.","Like the mail truck on one stretch of road.","Ethernet, Wi-Fi","Frame"]];
-document.querySelectorAll('.layer').forEach(b=>b.onclick=()=>{const d=info[b.dataset.i];
-$('layerInfo').innerHTML=`<strong>${d[0]}</strong><br>Job: ${d[1]}<br>Analogy: ${d[2]}<br>Examples: ${d[3]}<br>Data unit: ${d[4]}`});
-$('layerInfo').textContent='Select a layer above.';
-// Encapsulation
-const steps=["[ DATA ]","[ TCP header | DATA ]  ← Transport","[ IP header | TCP header | DATA ]  ← Internet","[ Frame header | IP | TCP | DATA | Frame trailer ]  ← Link"];
-let es=0;function encShow(){$('enc').innerHTML=steps.slice(0,es+1).map(s=>`<div>${s.replace(/</g,'&lt;')}</div>`).join('')}
-$('encBtn').onclick=()=>{es=Math.min(es+1,3);encShow()};$('encReset').onclick=()=>{es=0;encShow()};encShow();
-// TCP simulator
-let pk=[],arr=[],lostIdx=null;
-const chip=(p,c='')=>`<span class="pkt ${c}">#${p.n}: "${p.t}"</span>`;
-function render(){$('sent').innerHTML=pk.map(p=>chip(p)).join('');
-$('recv').innerHTML=arr.map(p=>chip(p,p.re?'re':'')).join('');}
-function say(s){$('status').innerHTML='<strong>Status:</strong> '+s}
-$('split').onclick=()=>{const m=$('msg').value;pk=[];for(let i=0;i<m.length;i+=3)pk.push({n:pk.length+1,t:m.slice(i,i+3)});arr=[];lostIdx=null;$('out').textContent='';render();say(`Message split into ${pk.length} numbered packets.`)};
-$('shuffle').onclick=()=>{if(!pk.length)return say('Do step 1 first.');arr=[...pk].reverse();render();
-$('out').textContent='Without sequence numbers: '+arr.map(p=>p.t).join('');say('Packets arrived in the wrong order. The receiver uses the sequence numbers to sort them.')};
-$('drop').onclick=()=>{if(!pk.length)return say('Do step 1 first.');if(!arr.length)arr=[...pk];
-if(pk.length<2)return say('Message too short to demonstrate.');
-lostIdx=Math.floor(Math.random()*pk.length)+1;arr=arr.filter(p=>p.n!==lostIdx);render();
-$('out').textContent='Missing packet #'+lostIdx+'. Message incomplete!';say(`Packet #${lostIdx} was lost. The sender gets no ACK for it.`)};
-$('fix').onclick=()=>{if(!pk.length)return say('Do step 1 first.');
-if(lostIdx){const p=pk.find(x=>x.n===lostIdx);arr.push({...p,re:true});say(`Timeout: the sender re-sent packet #${lostIdx} (yellow).`);lostIdx=null}
-else say('Sorted by sequence number.');
-const sorted=[...arr].sort((a,b)=>a.n-b.n);render();
-$('out').textContent=sorted.map(p=>p.t).join('');};
-// IPv4
-function bin(n){return n.toString(2).padStart(8,'0')}
-function parse(s){const p=s.trim().split('.');if(p.length!==4||p.some(x=>!/^\d+$/.test(x)||+x>255))return null;return p.map(Number)}
-const toInt=o=>((o[0]<<24)>>>0)+(o[1]<<16)+(o[2]<<8)+o[3];
-const toIp=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
-function upIp(){const o=parse($('ip').value);$('ipBin').textContent=o?o.map(bin).join('.'):'Enter four numbers from 0 to 255, like 192.168.10.25.';upSub()}
-function upSub(){const o=parse($('ip').value)||[192,168,10,25];const p=+$('pre').value;$('preVal').textContent=p;
-const all=o.map(bin).join('');
-$('subBits').innerHTML=`<span class="net">${all.slice(0,p).replace(/(.{8})(?=.)/g,'$1.')}</span><span class="host">${all.slice(p)}</span>`.replace(/(<\/span>)(<span class="host">)/,'$1$2');
-const mask=p===0?0:(0xFFFFFFFF<<(32-p))>>>0;const ip=toInt(o);const net=(ip&mask)>>>0;const bc=(net|(~mask>>>0))>>>0;const tot=2**(32-p);
-$('subTbl').innerHTML=`<tr><td>Subnet mask</td><td>${toIp(mask)}</td></tr><tr><td>Network address</td><td>${toIp(net)}</td></tr><tr><td>Broadcast address</td><td>${toIp(bc)}</td></tr><tr><td>First / last usable</td><td>${toIp(net+1)} – ${toIp(bc-1)}</td></tr><tr><td>Total addresses</td><td>${tot.toLocaleString()}</td></tr><tr><td>Usable hosts</td><td>${(tot-2).toLocaleString()}</td></tr>`}
-$('ip').oninput=upIp;$('pre').oninput=upSub;upIp();
-</script>
+<section id="quiz" aria-labelledby="h-quiz"><h2 id="h-quiz">6. Self-Check Quiz</h2>
+<form class="card quiz" id="quizForm" onsubmit="return false"></form>
+<p id="score" aria-live="polite" role="status"></p>
+</section>
+
+<section id="glossary" aria-labelledby="h-glossary"><h2 id="h-glossary">Glossary</h2>
+<div class="card"><dl>
+<dt>ACK</dt><dd>Acknowledgement: "I received it."</dd>
+<dt>Bit / Octet</dt><dd>A bit is a 0 or 1. An octet is 8 bits.</dd>
+<dt>Broadcast address</dt><dd>The last address in a subnet; reaches all hosts on it.</dd>
+<dt>DNS</dt><dd>Domain Name System: turns names into IP addresses.</dd>
+<dt>Encapsulation</dt><dd>Wrapping data with a header (and sometimes a trailer) at each layer.</dd>
+<dt>Frame</dt><dd>The data unit at the Link layer.</dd>
+<dt>Header</dt><dd>Control information placed before the data.</dd>
+<dt>Host</dt><dd>A device on a network.</dd>
+<dt>IP address</dt><dd>A number that identifies a device on a network.</dd>
+<dt>MTU</dt><dd>Maximum transmission unit: the largest packet a link carries. Commonly 1500 bytes on Ethernet.</dd>
+<dt>Packet</dt><dd>A small piece of data sent across a network; the Internet layer unit.</dd>
+<dt>Port</dt><dd>A number that identifies a program on a computer.</dd>
+<dt>Protocol</dt><dd>An agreed set of rules for communicating.</dd>
+<dt>Router</dt><dd>A device that forwards packets between networks.</dd>
+<dt>Segment</dt><dd>The data unit of TCP at the Transport layer.</dd>
+<dt>Sequence number</dt><dd>A number that shows where a piece of data belongs in order.</dd>
+<dt>Subnet mask / Prefix</dt><dd>Shows which bits of an address are the network part.</dd>
+<dt>SYN</dt><dd>Synchronize: the message that starts a TCP connection.</dd>
+</dl></div></section>
+
+<section id="sources" aria-labelledby="h-sources"><h2 id="h-sources">Sources</h2>
+<ul><li>RFC 791: Internet Protocol (IPv4)</li><li>RFC 9293: Transmission Control Protocol (TCP)</li><li>RFC 768: User Datagram Protocol (UDP)</li><li>RFC 1918: Address Allocation for Private Internets</li><li>RFC 4632: Classless Inter-domain Routing (CIDR)</li></ul>
+<h3>Simplifications</h3>
+<ul class="legend"><li>Real headers carry many more fields than shown.</li>
+<li>The simulator numbers 3-character chunks; real TCP numbers bytes and uses cumulative ACKs, timers, and windows.</li>
+<li>The handshake and web animations leave out details such as TLS for HTTPS, DNS caching, and many routers between you and a server.</li>
+<li>Prefixes /31 and /32 have special rules and are not covered by the slider.</li>
+<li>The example address 203.0.113.10 is reserved for documentation (RFC 5737).</li></ul>
+<p><a href="js/tests.html">Run the subnet math self-test</a></p></section>
+</main>
+<footer><p class="legend">Made for classroom use.</p></footer>
+<script src="js/subnet.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
