@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Subnet self-test</title>
+<style>body{font-family:system-ui,sans-serif;background:#0f172a;color:#f1f5f9;padding:20px}.p{color:#4ade80}.f{color:#f87171}a{color:#38bdf8}</style></head>
+<body><h1>Subnet math self-test</h1><p><a href="../index.html">Back to the guide</a></p><ul id="r"></ul>
+<script src="subnet.js"></script>
+<script>
+const out = document.getElementById('r');
+let fails = 0;
+function eq(name, got, want) {
+  const ok = got === want;
+  if (!ok) { fails++; console.error('FAIL', name, got, want); }
+  const li = document.createElement('li');
+  li.className = ok ? 'p' : 'f';
+  li.textContent = (ok ? 'PASS ' : 'FAIL ') + name + ' = ' + got + (ok ? '' : ' (expected ' + want + ')');
+  out.appendChild(li);
+}
+eq('2^32', Math.pow(2, 32), 4294967296);
+eq('parse 192.168.10.25 round trip', Net.str(Net.parse('192.168.10.25')), '192.168.10.25');
+eq('reject 256', Net.parse('1.2.3.256'), null);
+const ip = Net.parse('192.168.10.25');
+[[8,'255.0.0.0','192.0.0.0','192.255.255.255','192.0.0.1','192.255.255.254',16777216,16777214],
+ [16,'255.255.0.0','192.168.0.0','192.168.255.255','192.168.0.1','192.168.255.254',65536,65534],
+ [24,'255.255.255.0','192.168.10.0','192.168.10.255','192.168.10.1','192.168.10.254',256,254],
+ [30,'255.255.255.252','192.168.10.24','192.168.10.27','192.168.10.25','192.168.10.26',4,2]
+].forEach(([p,m,n,b,f,l,t,u]) => {
+  const i = Net.info(ip, p), k = '/' + p + ' ';
+  eq(k+'mask', Net.str(i.mask), m); eq(k+'network', Net.str(i.network), n);
+  eq(k+'broadcast', Net.str(i.broadcast), b); eq(k+'first', Net.str(i.first), f);
+  eq(k+'last', Net.str(i.last), l); eq(k+'total', i.total, t); eq(k+'usable', i.usable, u);
+});
+eq('172.16.0.0/12 last', Net.str(Net.info(Net.parse('172.16.0.0'), 12).broadcast), '172.31.255.255');
+eq('10.0.0.0/8 last', Net.str(Net.info(Net.parse('10.0.0.0'), 8).broadcast), '10.255.255.255');
+eq('192.168.0.0/16 last', Net.str(Net.info(Net.parse('192.168.0.0'), 16).broadcast), '192.168.255.255');
+const s = document.createElement('p'); s.textContent = fails ? fails + ' test(s) failed' : 'All tests passed'; s.className = fails ? 'f' : 'p';
+out.before(s); console.log(s.textContent);
+</script></body></html>
