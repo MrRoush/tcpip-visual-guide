@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TCP/IP Visual Guide</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#cbd5e1;--accent:#38bdf8;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:var(--accent)}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;color:#000;padding:8px;z-index:9}
+header,main,footer{max-width:960px;margin:auto;padding:16px}
+nav{position:sticky;top:0;background:#0b1222;padding:8px 16px;display:flex;gap:16px;flex-wrap:wrap;border-bottom:1px solid #334155}
+h1{font-size:2rem}h2{border-bottom:2px solid var(--accent);padding-bottom:4px;margin-top:48px}
+.card{background:var(--card);border-radius:12px;padding:16px;margin:16px 0}
+button{background:var(--accent);color:#0f172a;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;margin:4px 4px 4px 0}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+input[type=text]{padding:8px;border-radius:6px;border:1px solid #64748b;background:#0f172a;color:var(--text);width:100%;max-width:320px}
+.layer{display:block;width:100%;text-align:left;margin:6px 0;padding:14px;font-size:1rem;color:#0f172a}
+.l4{background:#a78bfa}.l3{background:#38bdf8}.l2{background:#4ade80}.l1{background:#fbbf24}
+.pkts{display:flex;gap:8px;flex-wrap:wrap;min-height:60px}
+.pkt{border:2px solid var(--accent);border-radius:8px;padding:6px 10px;background:#0f172a;font-family:monospace}
+.pkt.lost{border-color:var(--bad);text-decoration:line-through}
+.pkt.re{border-color:var(--warn)}
+.pkt.ok{border-color:var(--ok)}
+.bits{font-family:monospace;font-size:1.05rem;word-break:break-all}
+.net{color:var(--accent);font-weight:700}.host{color:var(--warn)}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #475569;padding:6px;text-align:left}
+.legend{font-size:.9rem;color:var(--muted)}
+@media(prefers-reduced-motion:no-preference){.pkt{transition:all .3s}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav aria-label="Sections">
+<a href="#layers">Layers</a><a href="#tcp">TCP</a><a href="#ipv4">IPv4</a><a href="#subnet">Subnets</a><a href="#sources">Sources</a>
+</nav>
+<header><h1>How the Internet Sends Data: TCP/IP</h1>
+<p>TCP/IP is a set of rules (called <strong>protocols</strong>) that lets computers talk to each other. Think of it like the postal system: there are rules for addressing, packaging, delivering, and checking that the mail arrived.</p></header>
+<main id="main">
+
+<section id="layers"><h2>1. The Four Layers</h2>
+<p>TCP/IP splits the job into 4 layers. Each layer does one job and hands the data to the next. Select a layer to learn more.</p>
+<div class="card">
+<button class="layer l4" data-i="0">Layer 4 – Application: the data you use (web, email)</button>
+<button class="layer l3" data-i="1">Layer 3 – Transport: breaks data up and checks delivery</button>
+<button class="layer l2" data-i="2">Layer 2 – Internet: addresses and routes packets</button>
+<button class="layer l1" data-i="3">Layer 1 – Network Interface (Link): sends bits over wire or Wi-Fi</button>
+<div id="layerInfo" aria-live="polite" class="card"></div>
+</div>
+<div class="card"><h3>Encapsulation: adding "envelopes"</h3>
+<p>Going down the stack, each layer wraps the data with its own header, like putting a letter in an envelope, then in a bigger envelope.</p>
+<button id="encBtn">Show next step</button><button id="encReset">Reset</button>
+<div id="enc" aria-live="polite" class="bits"></div></div>
+</section>
+
+<section id="tcp"><h2>2. Transport Layer and TCP</h2>
+<div class="card"><h3>Why break data into packets?</h3>
+<ul><li>Links are shared. Small pieces let many people take turns.</li>
+<li>If one piece is damaged or lost, only that piece is sent again, not the whole file.</li>
+<li>Networks have size limits. On Ethernet, a packet commonly holds up to about 1500 bytes.</li>
+<li>Pieces can take different routes.</li></ul>
+<p>Analogy: mailing a book as numbered envelopes. The numbers let the receiver put it back in order.</p></div>
+
+<div class="card"><h3>Try it: send a message</h3>
+<label for="msg">Message:</label><br>
+<input id="msg" type="text" value="HELLO WORLD FRIEND" maxlength="40"><br>
+<button id="split">1. Split into packets</button>
+<button id="shuffle">2. Send out of order</button>
+<button id="drop">3. Lose one packet</button>
+<button id="fix">4. Let TCP fix it</button>
+<p class="legend">Real TCP numbers bytes, not packets. This demo simplifies by numbering small chunks.</p>
+<h4>Sent</h4><div id="sent" class="pkts"></div>
+<h4>Received (in arrival order)</h4><div id="recv" class="pkts"></div>
+<h4>Reassembled message</h4><div id="out" class="bits" aria-live="polite"></div>
+<p id="status" aria-live="polite"><strong>Status:</strong> Press step 1.</p></div>
+
+<div class="card"><h3>The 3-way handshake</h3>
+<p>Before sending data, TCP sets up a connection:</p>
+<ol><li><strong>SYN</strong> – Client: "Can we talk?"</li><li><strong>SYN-ACK</strong> – Server: "Yes, I'm ready. Are you?"</li><li><strong>ACK</strong> – Client: "Ready!"</li></ol>
+<p>Then data flows. The receiver sends <strong>ACK</strong>s to confirm what arrived. If the sender doesn't get an ACK in time, it sends the data again.</p></div>
+
+<div class="card"><h3>TCP vs UDP</h3>
+<table><tr><th></th><th>TCP</th><th>UDP</th></tr>
+<tr><td>Connection</td><td>Yes (handshake)</td><td>No</td></tr>
+<tr><td>Reliable and ordered</td><td>Yes</td><td>No</td></tr>
+<tr><td>Speed</td><td>Slower (more checking)</td><td>Faster (less overhead)</td></tr>
+<tr><td>Used for</td><td>Web, email, file transfer</td><td>Video calls, games, DNS lookups (usually)</td></tr></table>
+<p>Ports tell the computer which program gets the data: HTTP 80, HTTPS 443, SSH 22, DNS 53.</p></div>
+</section>
+
+<section id="ipv4"><h2>3. IPv4 Addresses</h2>
+<div class="card">
+<p>An IPv4 address has <strong>32 bits</strong>, written as 4 numbers (<em>octets</em>) of 8 bits each. Each number is 0 to 255. Example: <code>192.168.10.25</code>.</p>
+<p>Total possible addresses: 2<sup>32</sup> = <strong>4,294,967,296</strong> (about 4.3 billion). That's not enough for every device today, so IPv6 (128-bit addresses) was created.</p>
+<label for="ip">Try an address:</label>
+<input id="ip" type="text" value="192.168.10.25">
+<p id="ipBin" class="bits" aria-live="polite"></p></div>
+</section>
+
+<section id="subnet"><h2>4. Subnet Masks and Prefixes</h2>
+<div class="card">
+<p>A <strong>subnet mask</strong> says which bits are the <span class="net">network part</span> (which street) and which are the <span class="host">host part</span> (which house). A <strong>prefix</strong> like <code>/24</code> means "the first 24 bits are the network".</p>
+<label for="pre">Prefix length: /<span id="preVal">24</span></label><br>
+<input id="pre" type="range" min="8" max="30" value="24">
+<p id="subBits" class="bits" aria-live="polite"></p>
+<table id="subTbl"></table>
+<p class="legend">Network address (all host bits 0) and broadcast address (all host bits 1) are reserved, so usable hosts = total − 2.</p></div>
+<div class="card"><h3>/16 vs /24</h3>
+<table><tr><th></th><th>/16</th><th>/24</th></tr>
+<tr><td>Mask</td><td>255.255.0.0</td><td>255.255.255.0</td></tr>
+<tr><td>Host bits</td><td>16</td><td>8</td></tr>
+<tr><td>Total addresses</td><td>65,536</td><td>256</td></tr>
+<tr><td>Usable hosts</td><td>65,534</td><td>254</td></tr></table>
+<p>Bigger prefix number = smaller network.</p>
+<p>Private ranges (not routed on the public internet): 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16.</p></div>
+</section>
+
+<section id="sources"><h2>Sources</h2>
+<ul><li>RFC 791 – Internet Protocol</li><li>RFC 9293 – TCP</li><li>RFC 768 – UDP</li><li>RFC 1918 – Private address space</li><li>RFC 4632 – CIDR</li></ul>
+<p class="legend">Simplifications: real packets carry more header fields; the simulator numbers chunks instead of bytes.</p></section>
+</main>
+<footer><p class="legend">Draft v0.1 for classroom use.</p></footer>
+
+<script>
+const $=id=>document.getElementById(id);
+// Layers
+const info=[
+["Application","Programs use this layer to talk over the network.","Like writing the letter.","HTTP, HTTPS, DNS, SMTP","Data / message"],
+["Transport","Splits data into pieces, numbers them, and (with TCP) checks they arrive.","Like numbering the pages and asking for a receipt.","TCP, UDP","Segment (TCP) / Datagram (UDP)"],
+["Internet","Adds source and destination IP addresses and picks the route.","Like writing the street address.","IP, ICMP","Packet"],
+["Network Interface (Link)","Sends bits over the local wire or Wi-Fi to the next device.","Like the mail truck on one stretch of road.","Ethernet, Wi-Fi","Frame"]];
+document.querySelectorAll('.layer').forEach(b=>b.onclick=()=>{const d=info[b.dataset.i];
+$('layerInfo').innerHTML=`<strong>${d[0]}</strong><br>Job: ${d[1]}<br>Analogy: ${d[2]}<br>Examples: ${d[3]}<br>Data unit: ${d[4]}`});
+$('layerInfo').textContent='Select a layer above.';
+// Encapsulation
+const steps=["[ DATA ]","[ TCP header | DATA ]  ← Transport","[ IP header | TCP header | DATA ]  ← Internet","[ Frame header | IP | TCP | DATA | Frame trailer ]  ← Link"];
+let es=0;function encShow(){$('enc').innerHTML=steps.slice(0,es+1).map(s=>`<div>${s.replace(/</g,'&lt;')}</div>`).join('')}
+$('encBtn').onclick=()=>{es=Math.min(es+1,3);encShow()};$('encReset').onclick=()=>{es=0;encShow()};encShow();
+// TCP simulator
+let pk=[],arr=[],lostIdx=null;
+const chip=(p,c='')=>`<span class="pkt ${c}">#${p.n}: "${p.t}"</span>`;
+function render(){$('sent').innerHTML=pk.map(p=>chip(p)).join('');
+$('recv').innerHTML=arr.map(p=>chip(p,p.re?'re':'')).join('');}
+function say(s){$('status').innerHTML='<strong>Status:</strong> '+s}
+$('split').onclick=()=>{const m=$('msg').value;pk=[];for(let i=0;i<m.length;i+=3)pk.push({n:pk.length+1,t:m.slice(i,i+3)});arr=[];lostIdx=null;$('out').textContent='';render();say(`Message split into ${pk.length} numbered packets.`)};
+$('shuffle').onclick=()=>{if(!pk.length)return say('Do step 1 first.');arr=[...pk].reverse();render();
+$('out').textContent='Without sequence numbers: '+arr.map(p=>p.t).join('');say('Packets arrived in the wrong order. The receiver uses the sequence numbers to sort them.')};
+$('drop').onclick=()=>{if(!pk.length)return say('Do step 1 first.');if(!arr.length)arr=[...pk];
+if(pk.length<2)return say('Message too short to demonstrate.');
+lostIdx=Math.floor(Math.random()*pk.length)+1;arr=arr.filter(p=>p.n!==lostIdx);render();
+$('out').textContent='Missing packet #'+lostIdx+'. Message incomplete!';say(`Packet #${lostIdx} was lost. The sender gets no ACK for it.`)};
+$('fix').onclick=()=>{if(!pk.length)return say('Do step 1 first.');
+if(lostIdx){const p=pk.find(x=>x.n===lostIdx);arr.push({...p,re:true});say(`Timeout: the sender re-sent packet #${lostIdx} (yellow).`);lostIdx=null}
+else say('Sorted by sequence number.');
+const sorted=[...arr].sort((a,b)=>a.n-b.n);render();
+$('out').textContent=sorted.map(p=>p.t).join('');};
+// IPv4
+function bin(n){return n.toString(2).padStart(8,'0')}
+function parse(s){const p=s.trim().split('.');if(p.length!==4||p.some(x=>!/^\d+$/.test(x)||+x>255))return null;return p.map(Number)}
+const toInt=o=>((o[0]<<24)>>>0)+(o[1]<<16)+(o[2]<<8)+o[3];
+const toIp=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+function upIp(){const o=parse($('ip').value);$('ipBin').textContent=o?o.map(bin).join('.'):'Enter four numbers from 0 to 255, like 192.168.10.25.';upSub()}
+function upSub(){const o=parse($('ip').value)||[192,168,10,25];const p=+$('pre').value;$('preVal').textContent=p;
+const all=o.map(bin).join('');
+$('subBits').innerHTML=`<span class="net">${all.slice(0,p).replace(/(.{8})(?=.)/g,'$1.')}</span><span class="host">${all.slice(p)}</span>`.replace(/(<\/span>)(<span class="host">)/,'$1$2');
+const mask=p===0?0:(0xFFFFFFFF<<(32-p))>>>0;const ip=toInt(o);const net=(ip&mask)>>>0;const bc=(net|(~mask>>>0))>>>0;const tot=2**(32-p);
+$('subTbl').innerHTML=`<tr><td>Subnet mask</td><td>${toIp(mask)}</td></tr><tr><td>Network address</td><td>${toIp(net)}</td></tr><tr><td>Broadcast address</td><td>${toIp(bc)}</td></tr><tr><td>First / last usable</td><td>${toIp(net+1)} – ${toIp(bc-1)}</td></tr><tr><td>Total addresses</td><td>${tot.toLocaleString()}</td></tr><tr><td>Usable hosts</td><td>${(tot-2).toLocaleString()}</td></tr>`}
+$('ip').oninput=upIp;$('pre').oninput=upSub;upIp();
+</script>
+</body>
+</html>
